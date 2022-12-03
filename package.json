@@ -1,0 +1,28 @@
+{
+  "name": "crawler-leilao",
+  "version": "1.0.0",
+  "description": "Aplicação para buscar informações de carros e motos em sites de leilões",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrunoTuy/crawler-leilao.git"
+  },
+  "keywords": [
+    "crawler",
+    "leilões",
+    "leilão"
+  ],
+  "author": "Bruno Tuy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BrunoTuy/crawler-leilao/issues"
+  },
+  "homepage": "https://github.com/BrunoTuy/crawler-leilao#readme",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "request": "^2.88.2"
+  }
+}
