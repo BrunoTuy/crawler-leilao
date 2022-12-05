@@ -5,6 +5,7 @@ const tratarDataHora = (val) => {
     const data = `20${array[2]}-${array[1]}-${array[0]}`;
 
     obj.date = new Date(data);
+    obj.time = obj.date.getTime();
   } else if (val.length === 19 && val.includes('/') && val.includes(':')) {
     const array = val.split(' ');
     const arrayData = array[0].split('/');
@@ -12,6 +13,7 @@ const tratarDataHora = (val) => {
     const hora = array[1];
 
     obj.date = new Date(`${data}T${hora}`);
+    obj.time = obj.date.getTime();
   }
 
   return obj;
