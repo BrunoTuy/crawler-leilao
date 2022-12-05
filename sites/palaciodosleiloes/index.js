@@ -1,5 +1,5 @@
 const listarLotes = require('./listarLotes.js');
 
-module.exports = ({ cheerio, request }) => ({
-  listarLotes: listarLotes({ cheerio, request })
+module.exports = (params) => ({
+  listarLotes: listarLotes(params)
 });

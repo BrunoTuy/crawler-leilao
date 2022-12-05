@@ -23,6 +23,8 @@
   "homepage": "https://github.com/BrunoTuy/crawler-leilao#readme",
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
-    "request": "^2.88.2"
+    "mongodb": "^4.12.1",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6"
   }
 }
