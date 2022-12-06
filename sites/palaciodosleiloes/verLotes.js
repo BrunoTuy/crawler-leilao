@@ -18,4 +18,4 @@ const exec = ({ cheerio, request }) => {
   return fnc;
 };
 
-module.exports = exec;
+export default exec;

@@ -1,7 +1,9 @@
-const request = require('request-promise');
-const cheerio = require('cheerio');
-const { MongoClient, ObjectId } = require('mongodb');
-const palacio = require('./sites/palaciodosleiloes')({ cheerio, request });
+import request from 'request-promise';
+import cheerio from 'cheerio';
+import { MongoClient, ObjectId } from 'mongodb';
+import p from './sites/palaciodosleiloes/index.js';
+
+const palacio = p({ cheerio, request });
 
 const client = new MongoClient('mongodb://localhost:27017');
 
@@ -64,4 +66,4 @@ const main = async () => {
   const informacoes = await palacio.verLotes({ lote: 1087518, leilao: 6585 });
 };
 
-main();
+buscarSalvarLotes();

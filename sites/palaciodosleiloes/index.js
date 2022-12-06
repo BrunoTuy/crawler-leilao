@@ -1,7 +1,7 @@
-const listarLotes = require('./listarLotes.js');
-const verLotes = require('./verLotes.js');
+import listarLotes from './listarLotes.js';
+import verLotes from './verLotes.js';
 
-module.exports = (params) => ({
+export default (params) => ({
   listarLotes: listarLotes(params),
   verLotes: verLotes(params)
 });

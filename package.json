@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Aplicação para buscar informações de carros e motos em sites de leilões",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
