@@ -5,14 +5,14 @@ const palacio = require('./sites/palaciodosleiloes')({ cheerio, request });
 
 const client = new MongoClient('mongodb://localhost:27017');
 
-const main = async () => {
+const buscarSalvarLotes = async () => {
   await client.connect();
   const db = client.db('leiloes');
   const collection = db.collection('palacioDosLeiloes');
   const listaBanco = await collection.find().toArray();
   const listaSite = await palacio.listarLotes();
 
-  [listaSite[0]].forEach(async (i) => {
+  listaSite.forEach(async (i, index, array) => {
     const setObj = {};
     const itemBanco = listaBanco.find(({ registro }) => registro.lote === i.registro.lote && registro.leilao === i.registro.leilao);
 
@@ -52,11 +52,16 @@ const main = async () => {
 
     }
 
+    // if (index >= array.length - 1) {
+    //   client.close()
+    // }
   });
 
   console.log(`${listaSite.length} registros - ${listaSite.filter(i => i.atualizado).length} atualizados`);
-  // client.close();
+};
+
+const main = async () => {
+  const informacoes = await palacio.verLotes({ lote: 1087518, leilao: 6585 });
 };
 
 main();
-
