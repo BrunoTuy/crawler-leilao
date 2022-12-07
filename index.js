@@ -31,7 +31,6 @@ const buscarSalvarLotes = async () => {
         setObj.log = (itemBanco.log || []).concat([{
           momento: new Date(),
           acao: 'update',
-          dadoSite: i,
           dadoSalvo: JSON.stringify(setObj)
         }]);
         const resposta = await collection.updateOne({ _id: new ObjectId(itemBanco._id.toString()) }, { $set: setObj });
@@ -40,7 +39,7 @@ const buscarSalvarLotes = async () => {
           i.atualizado = true;
         }
 
-        console.log(`Registro ${i.index} - ${i.atualizado ? '' : 'não '}atualizado`);
+        console.log(i.registro, `Registro ${i.atualizado ? '' : 'não '}atualizado`);
       }
     } else {
       const resposta = await collection.insertOne({
@@ -52,11 +51,12 @@ const buscarSalvarLotes = async () => {
         }]
       });
 
+      console.log(i.registro, 'Cadastrado', resposta.insertedId);
     }
 
-    // if (index >= array.length - 1) {
-    //   client.close()
-    // }
+    if (index >= array.length - 1) {
+      setTimeout(() => client.close(), 2000);
+    }
   });
 
   console.log(`${listaSite.length} registros - ${listaSite.filter(i => i.atualizado).length} atualizados`);

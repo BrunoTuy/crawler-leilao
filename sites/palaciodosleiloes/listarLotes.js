@@ -40,7 +40,6 @@ const exec = ({ cheerio, request }) => {
       }
 
       const dado = {
-        index,
         registro: {
           lote: onclick.substring(onclick.indexOf('(')+1, onclick.indexOf(',')),
           leilao: onclick.substring(onclick.indexOf(',')+1, onclick.indexOf(')'))
