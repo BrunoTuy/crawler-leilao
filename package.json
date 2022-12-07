@@ -5,6 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "db:up": "docker-compose up -d db",
+    "db:down": "docker-compose down",
+    "db:delete": "docker-compose down -v",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

@@ -1,0 +1,18 @@
+version: '3.6'
+
+services:
+  db:
+    image: mongo
+    environment:
+      - AUTH=yes
+      - MONGODB_ADMIN_USER=cl
+      - MONGODB_ADMIN_PASS=cl
+      - MONGODB_APPLICATION_DATABASE=cl
+      - MONGODB_APPLICATION_USER=cl
+      - MONGODB_APPLICATION_PASS=cl
+    ports:
+      - 27017:27017
+
+volumes:
+  db_data:
+    external: false
