@@ -41,14 +41,14 @@ const exec = ({ cheerio, request }) => {
 
       const dado = {
         registro: {
-          lote: onclick.substring(onclick.indexOf('(')+1, onclick.indexOf(',')),
-          leilao: onclick.substring(onclick.indexOf(',')+1, onclick.indexOf(')'))
+          lote: Number(onclick.substring(onclick.indexOf('(')+1, onclick.indexOf(','))),
+          leilao: Number(onclick.substring(onclick.indexOf(',')+1, onclick.indexOf(')')))
         }
       };
 
       const divs = $(tr).find('div');
       if (divs.length === 20) {
-        dado.sequencia = $(divs[1]).text().indexOf("Sequ") > -1 ? $(divs[2]).text() : null;
+        dado.sequencia = $(divs[1]).text().indexOf("Sequ") > -1 ? Number($(divs[2]).text()) : null;
         dado.lote = $(divs[3]).text() === "Lote" ? $(divs[4]).text() : null;
         dado.local = $(divs[5]).text() === "Local" ? $(divs[6]).text() : null;
         dado.visualizacoes = $(divs[7]).text().indexOf("Visualiza") > -1 ? $(divs[8]).text() : null;
@@ -70,6 +70,30 @@ const exec = ({ cheerio, request }) => {
         dado.bem = $(divs[15]).text();
         dado.origem = $(divs[16]).text();
         dado.descricao = $(divs[17]).text();
+      }
+
+      if (!isNaN(dado.sequencia)) {
+        dado.sequencia = Number(dado.sequencia);
+      }
+
+      if (!isNaN(dado.lote)) {
+        dado.lote = Number(dado.lote);
+      }
+
+      if (!isNaN(dado.visualizacoes)) {
+        dado.visualizacoes = Number(dado.visualizacoes);
+      }
+
+      if (!isNaN(dado.lances)) {
+        dado.lances = Number(dado.lances);
+      }
+
+      if (dado.ultimoLance) {
+        const val = dado.ultimoLance.replace('.', '').replace(',', '.');
+
+        if (!isNaN(val)) {
+          dado.ultimoLance = Number(val);
+        }
       }
 
       if (dado.descricao.toLowerCase().indexOf('colis') === 0) {
