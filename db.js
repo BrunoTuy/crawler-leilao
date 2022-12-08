@@ -16,14 +16,15 @@ const exec = async () => {
     return listaBanco;
   }
 
-  const salvarLista = async (colecao, lista) => {
+  const salvarLista = async (colecao, lista, fnc) => {
     const listaBanco = await buscarLista(colecao);
+    const collection = db.collection(colecao);
 
     lista.forEach(async (i, index, array) => {
       const itemBanco = listaBanco.find(({ registro }) => registro.lote === i.registro.lote && registro.leilao === i.registro.leilao);
 
       if (itemBanco) {
-        console.log(i.registro, 'Registro já cadastrado');
+        console.log(colecao, i.registro, 'Registro já cadastrado');
       } else {
         const resposta = await collection.insertOne({
           ...i,
@@ -34,13 +35,11 @@ const exec = async () => {
           }]
         });
 
-        console.log(i.registro, 'Cadastrado', resposta.insertedId);
+        console.log(colecao, i.registro, 'Cadastrado', resposta.insertedId.toString());
       }
 
-      if (index >= array.length - 1) {
-        setTimeout(() => {
-          client.close();
-        }, 2000);
+      if (index >= array.length - 1 && fnc) {
+        setTimeout(() => { fnc(); }, 2000);
       }
     });
   };
