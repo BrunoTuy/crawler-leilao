@@ -1,23 +1,4 @@
-const tratarDataHora = (val) => {
-  let obj = { string: val };
-  if (val.length === 8 && val.includes('/')) {
-    const array = val.split('/');
-    const data = `20${array[2]}-${array[1]}-${array[0]}`;
-
-    obj.date = new Date(data);
-    obj.time = obj.date.getTime();
-  } else if (val.length === 19 && val.includes('/') && val.includes(':')) {
-    const array = val.split(' ');
-    const arrayData = array[0].split('/');
-    const data = `${arrayData[2]}-${arrayData[1]}-${arrayData[0]}`;
-    const hora = array[1];
-
-    obj.date = new Date(`${data}T${hora}`);
-    obj.time = obj.date.getTime();
-  }
-
-  return obj;
-};
+import tratarDataHora from './_tratarDataHora.js';
 
 const exec = ({ cheerio, request }) => {
   const fnc = async () => {
@@ -51,8 +32,8 @@ const exec = ({ cheerio, request }) => {
         dado.sequencia = $(divs[1]).text().indexOf("Sequ") > -1 ? Number($(divs[2]).text()) : null;
         dado.lote = $(divs[3]).text() === "Lote" ? $(divs[4]).text() : null;
         dado.local = $(divs[5]).text() === "Local" ? $(divs[6]).text() : null;
-        dado.visualizacoes = $(divs[7]).text().indexOf("Visualiza") > -1 ? $(divs[8]).text() : null;
-        dado.lances = $(divs[9]).text() === "Lances" ? $(divs[10]).text() : null;
+        dado.totalVisualizacoes = $(divs[7]).text().indexOf("Visualiza") > -1 ? $(divs[8]).text() : null;
+        dado.totalLances = $(divs[9]).text() === "Lances" ? $(divs[10]).text() : null;
         dado.realizacao = $(divs[11]).text().indexOf("Realiza") > -1 ? tratarDataHora($(divs[12]).text()) : null;
         dado.previsao = $(divs[13]).text().indexOf("Previs") > -1 ? tratarDataHora($(divs[14]).text()) : null;
         dado.ultimoLance = $(divs[15]).text().indexOf("ltimo") > 0 ? $(divs[16]).text() : null;
@@ -62,8 +43,8 @@ const exec = ({ cheerio, request }) => {
       } else if (divs.length === 18) {
         dado.lote = $(divs[1]).text() === "Lote" ? $(divs[2]).text() : null;
         dado.local = $(divs[3]).text() === "Local" ? $(divs[4]).text() : null;
-        dado.visualizacoes = $(divs[5]).text().indexOf("Visualiza") > -1 ? $(divs[6]).text() : null;
-        dado.lances = $(divs[7]).text() === "Lances" ? $(divs[8]).text() : null;
+        dado.totalVisualizacoes = $(divs[5]).text().indexOf("Visualiza") > -1 ? $(divs[6]).text() : null;
+        dado.totalLances = $(divs[7]).text() === "Lances" ? $(divs[8]).text() : null;
         dado.realizacao = $(divs[9]).text().indexOf("Realiza") > -1 ? tratarDataHora($(divs[10]).text()) : null;
         dado.previsao = $(divs[11]).text().indexOf("Previs") > -1 ? tratarDataHora($(divs[12]).text()) : null;
         dado.ultimoLance = $(divs[13]).text().indexOf("ltimo") > 0 ? $(divs[14]).text() : null;
@@ -80,12 +61,12 @@ const exec = ({ cheerio, request }) => {
         dado.lote = Number(dado.lote);
       }
 
-      if (!isNaN(dado.visualizacoes)) {
-        dado.visualizacoes = Number(dado.visualizacoes);
+      if (!isNaN(dado.totalVisualizacoes)) {
+        dado.totalVisualizacoes = Number(dado.totalVisualizacoes);
       }
 
-      if (!isNaN(dado.lances)) {
-        dado.lances = Number(dado.lances);
+      if (!isNaN(dado.totalLances)) {
+        dado.totalLances = Number(dado.totalLances);
       }
 
       if (dado.ultimoLance) {
