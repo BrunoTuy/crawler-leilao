@@ -1,24 +1,23 @@
 import request from 'request-promise';
 import cheerio from 'cheerio';
 import p from './sites/palaciodosleiloes/index.js';
-import db from './db.js';
+import _db from './db.js';
 
-const palacio = p({ cheerio, request });
-const { close, buscarLista, salvarLista, atualizarRegistro } = await db();
+const db = await _db();
+const palacio = await p({ cheerio, request, db });
+const { close, buscarLista, atualizarRegistro } = db;
 
-const buscarSalvarLotes = async () => {
-  const listaSite = await palacio.listarLotes();
-
-  salvarLista('palacioDosLeiloes', listaSite);
+const buscarLotesSalvar = () => {
+  palacio.buscarLotesSalvar();
 };
 
-const buscarLotesAtualizar = async () => {
+const buscarLotesAtualizar = async (tempoEntreRequisicoes) => {
   const listaBanco = await buscarLista('palacioDosLeiloes', true);
 
-  baixarLoteAtualizar('palacioDosLeiloes', [listaBanco[0], listaBanco[1], listaBanco[2]], 0);
+  baixarLoteAtualizar('palacioDosLeiloes', listaBanco, 0, tempoEntreRequisicoes);
 };
 
-const baixarLoteAtualizar = async (collection, array, index) => {
+const baixarLoteAtualizar = async (collection, array, index, tempoEntreRequisicoes) => {
   if (index > array.length - 1) {
     console.log(`Fim da lista - ${index+1}/${array.length}`);
 
@@ -36,9 +35,9 @@ const baixarLoteAtualizar = async (collection, array, index) => {
     ...informacoesSite
   });
 
-  setTimeout(() => baixarLoteAtualizar(collection, array, index+1), 2000);
+  setTimeout(() => baixarLoteAtualizar(collection, array, index+1, tempoEntreRequisicoes), tempoEntreRequisicoes);
 };
 
 
-buscarLotesAtualizar();
-// buscarSalvarLotes();
+// buscarLotesAtualizar(2000);
+buscarLotesSalvar();
