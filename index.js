@@ -1,69 +1,44 @@
 import request from 'request-promise';
 import cheerio from 'cheerio';
-import { MongoClient, ObjectId } from 'mongodb';
 import p from './sites/palaciodosleiloes/index.js';
+import db from './db.js';
 
 const palacio = p({ cheerio, request });
-
-const client = new MongoClient('mongodb://localhost:27017');
+const { close, buscarLista, salvarLista, atualizarRegistro } = await db();
 
 const buscarSalvarLotes = async () => {
-  await client.connect();
-  const db = client.db('leiloes');
-  const collection = db.collection('palacioDosLeiloes');
-  const listaBanco = await collection.find().toArray();
   const listaSite = await palacio.listarLotes();
 
-  listaSite.forEach(async (i, index, array) => {
-    const setObj = {};
-    const itemBanco = listaBanco.find(({ registro }) => registro.lote === i.registro.lote && registro.leilao === i.registro.leilao);
+  salvarLista('palacioDosLeiloes', listaSite);
+};
 
-    if (itemBanco) {
-      Object.entries(i)
-        .filter(([key]) => !['_id', 'visualizacoes', 'lances', 'log'].includes(key))
-        .forEach(([key, value]) => {
-          if (key && JSON.stringify(itemBanco[key]) != JSON.stringify(value)) {
-            setObj[key] = value;
-          }
-        });
+const buscarLotesAtualizar = async () => {
+  const listaBanco = await buscarLista('palacioDosLeiloes', true);
 
-      if (JSON.stringify(setObj) != '{}') {
-        setObj.log = (itemBanco.log || []).concat([{
-          momento: new Date(),
-          acao: 'update',
-          dadoSalvo: JSON.stringify(setObj)
-        }]);
-        const resposta = await collection.updateOne({ _id: new ObjectId(itemBanco._id.toString()) }, { $set: setObj });
+  baixarLoteAtualizar('palacioDosLeiloes', [listaBanco[0], listaBanco[1], listaBanco[2]], 0);
+};
 
-        if (resposta.modifiedCount > 0) {
-          i.atualizado = true;
-        }
+const baixarLoteAtualizar = async (collection, array, index) => {
+  if (index > array.length - 1) {
+    console.log(`Fim da lista - ${index+1}/${array.length}`);
 
-        console.log(i.registro, `Registro ${i.atualizado ? '' : 'não '}atualizado`);
-      }
-    } else {
-      const resposta = await collection.insertOne({
-        ...i,
-        log: [{
-          momento: new Date(),
-          acao: 'insert',
-          dadoSite: i
-        }]
-      });
+    return close();
+  }
 
-      console.log(i.registro, 'Cadastrado', resposta.insertedId);
-    }
+  const { registro } = array[index];
 
-    if (index >= array.length - 1) {
-      setTimeout(() => client.close(), 2000);
-    }
+  console.log(registro, `${index+1}/${array.length}`, 'Vamos atualizar');
+
+  const informacoesSite = await palacio.verLotes(registro);
+
+  await atualizarRegistro(collection, {
+    registro,
+    ...informacoesSite
   });
 
-  console.log(`${listaSite.length} registros - ${listaSite.filter(i => i.atualizado).length} atualizados`);
+  setTimeout(() => baixarLoteAtualizar(collection, array, index+1), 2000);
 };
 
-const main = async () => {
-  const informacoes = await palacio.verLotes({ lote: 1087518, leilao: 6585 });
-};
 
-buscarSalvarLotes();
+buscarLotesAtualizar();
+// buscarSalvarLotes();
