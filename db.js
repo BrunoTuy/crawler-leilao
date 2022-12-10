@@ -7,17 +7,40 @@ const exec = async () => {
 
   const db = client.db('leiloes');
 
-  const buscarLista = async (colecao, filtraEncerrados) => {
+  const buscarLista = async ({ colecao, filtraEncerrados, filtroHoras }) => {
     const collection = db.collection(colecao);
-    const listaBanco = filtraEncerrados
-      ? await collection.find({encerrado: {$ne: true}}).toArray()
-      : await collection.find().toArray();
+    const filtro = {};
+    const data = new Date();
+
+    if (filtraEncerrados) {
+      filtro.encerrado = {$ne: true};
+    }
+
+    if (filtroHoras == '2') {
+      data.setTime(data.getTime() + (120 * 60 * 1000));
+      filtro['previsao.time'] = {$lt: data};
+    } else if (filtroHoras == '6') {
+      data.setTime(data.getTime() + (120 * 60 * 1000));
+      const inicial = data;
+
+      data.setTime(data.getTime() + (240 * 60 * 1000));
+      const final = data;
+
+      filtro['previsao.date'] = {$gte: inicial, $lt: final};
+    } else if (filtroHoras == '+6') {
+      data.setTime(data.getTime() + (360 * 60 * 1000));
+      filtro['previsao.date'] = {$gte: data};
+    }
+
+    console.log('- filtro busca', filtro);
+
+    const listaBanco = await collection.find(filtro).toArray();
 
     return listaBanco;
   }
 
   const salvarLista = async (colecao, lista, fnc) => {
-    const listaBanco = await buscarLista(colecao);
+    const listaBanco = await buscarLista({ colecao });
     const collection = db.collection(colecao);
 
     lista.forEach(async (i, index, array) => {
@@ -65,25 +88,26 @@ const exec = async () => {
       }
 
       Object.entries(informacoesSite)
-        .filter(([key]) => !['_id', 'lances', 'log', 'registro'].includes(key))
+        .filter(([key]) => !['_id', 'lances', 'log', 'registro', 'fotos'].includes(key))
         .forEach(([key, value]) => {
           if (key && JSON.stringify(i[key]) != JSON.stringify(value)) {
             setDados[key] = value;
           }
         });
 
+      const lancesSite = [];
       (informacoesSite.lances || []).forEach(l => {
-        if (!setDados.lances) {
-          setDados.lances = [];
+        if (!i.lances || !i.lances.push) {
+          i.lances = [];
         }
 
-        if (!i.lances || !i.lances.push || !i.lances.includes(l)) {
-          setDados.lances.push(l);
+        if (!i.lances || !i.lances.push || !i.lances.find(({ valor }) => valor === l.valor)) {
+          lancesSite.push(l);
         }
       });
 
-      if (setDados.lances && setDados.lances.length > 0 && i.lances && i.lances.push && i.lances.length > 0) {
-        setDados.lances = i.lances.concat(setDados.lances);
+      if (lancesSite && lancesSite.length > 0 && i.lances && i.lances.push) {
+        setDados.lances = i.lances.concat(lancesSite);
       }
     }
 
