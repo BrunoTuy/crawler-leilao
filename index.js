@@ -19,6 +19,8 @@ const buscarLotesAtualizar = async () => {
   });
 }
 
+buscarLotesSalvar();
+
 cron.schedule('*/3 * * * *', async () => {
   console.log('*** Atualizando lotes 2', new Date());
   await palacio.buscarLotesAtualizar({
