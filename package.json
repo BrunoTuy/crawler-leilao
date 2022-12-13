@@ -28,6 +28,7 @@
   "homepage": "https://github.com/BrunoTuy/crawler-leilao#readme",
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
+    "image-downloader": "^4.3.0",
     "mongodb": "^4.12.1",
     "node-cron": "^3.0.2",
     "pm2": "^5.2.2",

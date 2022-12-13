@@ -47,6 +47,18 @@ const exec = async () => {
     return listaBanco;
   }
 
+  const list = async ({ colecao, filtro }) => {
+    try {
+      const collection = db.collection(colecao);
+      const listaBanco = await collection.find(filtro).toArray();
+
+      return listaBanco;
+    } catch (e) {
+      console.log(colecao, dados.registro, 'Erro na busca', e);
+      return false;
+    }
+  };
+
   const insert = async ({ colecao, dados }) => {
     try {
       const collection = db.collection(colecao);
@@ -107,6 +119,7 @@ const exec = async () => {
     buscarLista,
     close,
     get,
+    list,
     insert,
     update
   };

@@ -6,10 +6,10 @@ import _db from './db.js';
 
 const db = await _db();
 const palacio = await p({ cheerio, request, db });
-const { close, buscarLista, atualizarRegistro } = db;
 
 const buscarLotesSalvar = async () => {
   await palacio.buscarLotesSalvar();
+  await palacio.downloadFotos();
 };
 
 const buscarLotesAtualizar = async () => {
