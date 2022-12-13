@@ -7,64 +7,84 @@ const exec = async () => {
 
   const db = client.db('leiloes');
 
-  const buscarLista = async ({ colecao, filtraEncerrados, filtroHoras }) => {
+  const buscarLista = async ({ colecao, filtraEncerrados, encerrando, filtroHoras }) => {
     const collection = db.collection(colecao);
     const filtro = {};
     const data = new Date();
 
-    if (filtraEncerrados) {
+    if (encerrando) {
+      filtro.encerrado = {$gte: 1};
+    } else if (filtraEncerrados) {
       filtro.encerrado = {$ne: true};
     }
 
-    if (filtroHoras == '2') {
+    if (filtroHoras == '30') {
+      data.setTime(data.getTime() + (30 * 60 * 1000));
+      filtro['previsao.time'] = {$lt: data.getTime()};
+    } else if (filtroHoras == '2') {
+      data.setTime(data.getTime() + (30 * 60 * 1000));
+      const inicial = data.getTime();
+
       data.setTime(data.getTime() + (120 * 60 * 1000));
-      filtro['previsao.time'] = {$lt: data};
+      const final = data.getTime();
+
+      filtro['previsao.time'] = {$gte: inicial, $lt: final};
     } else if (filtroHoras == '6') {
       data.setTime(data.getTime() + (120 * 60 * 1000));
-      const inicial = data;
+      const inicial = data.getTime();
 
       data.setTime(data.getTime() + (240 * 60 * 1000));
-      const final = data;
+      const final = data.getTime();
 
-      filtro['previsao.date'] = {$gte: inicial, $lt: final};
+      filtro['previsao.time'] = {$gte: inicial, $lt: final};
     } else if (filtroHoras == '+6') {
-      data.setTime(data.getTime() + (360 * 60 * 1000));
-      filtro['previsao.date'] = {$gte: data};
+      data.setTime(data.getTime() + (240 * 60 * 1000));
+      filtro['$or'] = [{'previsao.time': {$gte: data.getTime()}}, {'previsao.string': ''}];
     }
-
-    console.log('- filtro busca', filtro);
 
     const listaBanco = await collection.find(filtro).toArray();
 
     return listaBanco;
   }
 
-  const salvarLista = async (colecao, lista, fnc) => {
-    const listaBanco = await buscarLista({ colecao });
-    const collection = db.collection(colecao);
+  const insert = async ({ colecao, dados }) => {
+    try {
+      const collection = db.collection(colecao);
+      const resposta = await collection.insertOne({
+        ...dados,
+        log: [{
+          momento: new Date(),
+          acao: 'insert',
+          dadoSite: dados
+        }]
+      });
 
-    lista.forEach(async (i, index, array) => {
-      const itemBanco = listaBanco.find(({ registro }) => registro.lote === i.registro.lote && registro.leilao === i.registro.leilao);
+      return resposta.insertedId.toString();
+    } catch (e) {
+      console.log(colecao, dados.registro, 'Erro no cadastro', e);
+      return false;
+    }
+  };
 
-      if (itemBanco) {
-        console.log(colecao, i.registro, 'Registro já cadastrado');
-      } else {
-        const resposta = await collection.insertOne({
-          ...i,
-          log: [{
-            momento: new Date(),
-            acao: 'insert',
-            dadoSite: i
-          }]
-        });
+  const update = async ({ colecao, registro, set }) => {
+    try {
+      const collection = db.collection(colecao);
+      const i = await collection.findOne({ registro });
 
-        console.log(colecao, i.registro, 'Cadastrado', resposta.insertedId.toString());
-      }
+      set.log = (i.log || []).concat([{
+        momento: new Date(),
+        acao: 'update',
+        dadoSalvo: JSON.stringify(set)
+      }]);
 
-      if (index >= array.length - 1 && fnc) {
-        setTimeout(() => { fnc(); }, 2000);
-      }
-    });
+      const resposta = await collection.updateOne({ _id: new ObjectId(i._id.toString()) }, { $set: set });
+
+      return resposta.modifiedCount > 0;
+    } catch (e) {
+      console.log('** Não consegui atualizar', { colecao, id, set }, e);
+    }
+
+    return false;
   };
 
   const atualizarRegistro = async (colecao, informacoesSite) => {
@@ -76,7 +96,7 @@ const exec = async () => {
       if (i.encerrado) {
         setDados.encerrado = ++i.encerrado;
 
-        if (setDados.encerrado > 1) {
+        if (setDados.encerrado > 5) {
           setDados.encerrado = true;
         }
       } else {
@@ -135,7 +155,9 @@ const exec = async () => {
     buscarLista,
     salvarLista,
     atualizarRegistro,
-    close
+    close,
+    insert,
+    update
   };
 }
 
