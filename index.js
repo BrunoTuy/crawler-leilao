@@ -22,60 +22,60 @@ const buscarLotesAtualizar = async () => {
 buscarLotesSalvar();
 
 cron.schedule('*/1 * * * *', async () => {
-  console.log('*** Atualizando lotes 2', new Date());
+  console.log('*** Atualizando [encerrando]', new Date());
   await palacio.buscarLotesAtualizar({
     encerrando: true,
     tempoEntreRequisicoes: 5000
   });
-  console.log('*** Finalizando atualização lotes 2', new Date());
+  console.log('*** Finalizando atualização [encerrando]', new Date());
 }, {
   scheduled: true,
   timezone: "America/Sao_Paulo"
 });
 
 cron.schedule('*/3 * * * *', async () => {
-  console.log('*** Atualizando lotes 2', new Date());
+  console.log('*** Atualizando [30]', new Date());
   await palacio.buscarLotesAtualizar({
     filtroHoras: '30',
     tempoEntreRequisicoes: 5000
   });
-  console.log('*** Finalizando atualização lotes 2', new Date());
+  console.log('*** Finalizando atualização [30]', new Date());
 }, {
   scheduled: true,
   timezone: "America/Sao_Paulo"
 });
 
 cron.schedule('*/30 * * * *', async () => {
-  console.log('*** Atualizando lotes 2', new Date());
+  console.log('*** Atualizando [2]', new Date());
   await palacio.buscarLotesAtualizar({
     filtroHoras: '2',
     tempoEntreRequisicoes: 21000
   });
-  console.log('*** Finalizando atualização lotes 2', new Date());
+  console.log('*** Finalizando atualização [2]', new Date());
 }, {
   scheduled: true,
   timezone: "America/Sao_Paulo"
 });
 
 cron.schedule('45 * * * *', async () => {
-  console.log('*** Atualizando lotes 6', new Date());
+  console.log('*** Atualizando [6]', new Date());
   await palacio.buscarLotesAtualizar({
     filtroHoras: '6',
     tempoEntreRequisicoes: 45000
   });
-  console.log('*** Finalizando atualização lotes 6', new Date());
+  console.log('*** Finalizando atualização [6]', new Date());
 }, {
   scheduled: true,
   timezone: "America/Sao_Paulo"
 });
 
 cron.schedule('21 8,20 * * *', async () => {
-  console.log('*** Atualizando lotes +6', new Date());
+  console.log('*** Atualizando [+6]', new Date());
   await palacio.buscarLotesAtualizar({
     filtroHoras: '+6',
     tempoEntreRequisicoes: 90000
   });
-  console.log('*** Finalizando atualização lotes +6', new Date());
+  console.log('*** Finalizando atualização [+6]', new Date());
 }, {
   scheduled: true,
   timezone: "America/Sao_Paulo"
