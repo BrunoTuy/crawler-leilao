@@ -53,6 +53,12 @@ const exec = ({ cheerio, request }) => {
         dado.descricao = $(divs[17]).text();
       }
 
+      if (dado.previsao.string && !dado.previsao.time && dado.previsao.string.includes(':') && dado.realizacao.date) {
+        dado.previsao = tratarDataHora(`${dado.realizacao.string} ${dado.previsao.string}`);
+      } else if (dado.previsao.string && dado.previsao.string.length < 5) {
+        dado.previsao = dado.realizacao;
+      }
+
       if (!isNaN(dado.sequencia)) {
         dado.sequencia = Number(dado.sequencia);
       }
