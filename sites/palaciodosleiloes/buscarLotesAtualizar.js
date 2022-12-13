@@ -48,8 +48,23 @@ const exec = (params) => {
         }
       });
 
+      const fotosSite = [];
+      (informacoesSite.fotos || []).forEach(f => {
+        if (!i.fotos || !i.fotos.push) {
+          i.fotos = [];
+        }
+
+        if (!i.fotos.find(({ url }) => url === f)) {
+          fotosSite.push({ url: f });
+        }
+      });
+
       if (lancesSite && lancesSite.length > 0 && i.lances && i.lances.push) {
         setDados.lances = i.lances.concat(lancesSite);
+      }
+
+      if (fotosSite && fotosSite.length > 0 && i.fotos && i.fotos.push) {
+        setDados.fotos = i.fotos.concat(fotosSite);
       }
     }
 

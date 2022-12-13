@@ -31,7 +31,7 @@ const exec = ({ cheerio, request }) => {
 
     const totalFotos = $('input#total_fotos').attr('value');
     for (let idx = 0; idx < totalFotos; idx++) {
-      const foto = $(`div#fl_${idx} img`).attr('src');
+      const foto = $(`div#fl_${idx} img`).attr('src').split('?')[0];
 
       obj.fotos.push(foto);
     }
