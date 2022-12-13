@@ -15,7 +15,9 @@ const exec = (params) => {
     const setDados = {};
 
     if (informacoesSite.encerrado) {
-      if (i.encerrado) {
+      if (i.encerrado === true) {
+        console.log(i.registro, 'Registro já encerrado');
+      } else if (!isNaN(i.encerrado)) {
         setDados.encerrado = ++i.encerrado;
 
         if (setDados.encerrado > 5) {
