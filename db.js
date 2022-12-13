@@ -66,10 +66,24 @@ const exec = async () => {
     }
   };
 
+  const get = async ({ colecao, registro }) => {
+    try {
+      const collection = db.collection(colecao);
+      const i = await collection.findOne({ registro });
+
+      return i;
+    } catch (e) {
+      console.log('GET error', e);
+      return false;
+    }
+  };
+
   const update = async ({ colecao, registro, set }) => {
     try {
       const collection = db.collection(colecao);
       const i = await collection.findOne({ registro });
+
+      console.log('UPDATE', registro, set);
 
       set.log = (i.log || []).concat([{
         momento: new Date(),
@@ -87,75 +101,12 @@ const exec = async () => {
     return false;
   };
 
-  const atualizarRegistro = async (colecao, informacoesSite) => {
-    const collection = db.collection(colecao);
-    const i = await collection.findOne({registro: informacoesSite.registro});
-    const setDados = {};
-
-    if (informacoesSite.encerrado) {
-      if (i.encerrado) {
-        setDados.encerrado = ++i.encerrado;
-
-        if (setDados.encerrado > 5) {
-          setDados.encerrado = true;
-        }
-      } else {
-        setDados.encerrado = 1;
-      }
-    } else {
-      if (i.encerrado) {
-        setDados.encerrado = 0;
-      }
-
-      Object.entries(informacoesSite)
-        .filter(([key]) => !['_id', 'lances', 'log', 'registro', 'fotos'].includes(key))
-        .forEach(([key, value]) => {
-          if (key && JSON.stringify(i[key]) != JSON.stringify(value)) {
-            setDados[key] = value;
-          }
-        });
-
-      const lancesSite = [];
-      (informacoesSite.lances || []).forEach(l => {
-        if (!i.lances || !i.lances.push) {
-          i.lances = [];
-        }
-
-        if (!i.lances || !i.lances.push || !i.lances.find(({ valor }) => valor === l.valor)) {
-          lancesSite.push(l);
-        }
-      });
-
-      if (lancesSite && lancesSite.length > 0 && i.lances && i.lances.push) {
-        setDados.lances = i.lances.concat(lancesSite);
-      }
-    }
-
-    if (JSON.stringify(setDados) != '{}') {
-      setDados.log = (i.log || []).concat([{
-        momento: new Date(),
-        acao: 'update',
-        dadoSalvo: JSON.stringify(setDados)
-      }]);
-      const resposta = await collection.updateOne({ _id: new ObjectId(i._id.toString()) }, { $set: setDados });
-
-      if (resposta.modifiedCount > 0) {
-        i.atualizado = true;
-      }
-
-      console.log(i.registro, `Registro ${i.atualizado ? '' : 'não '}atualizado`);
-    } else {
-      console.log(i.registro, 'Registro sem atualizações');
-    }
-  }
-
   const close = () => client.close();
 
   return {
     buscarLista,
-    salvarLista,
-    atualizarRegistro,
     close,
+    get,
     insert,
     update
   };

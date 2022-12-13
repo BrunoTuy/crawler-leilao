@@ -21,11 +21,23 @@ const buscarLotesAtualizar = async () => {
 
 buscarLotesSalvar();
 
+cron.schedule('*/1 * * * *', async () => {
+  console.log('*** Atualizando lotes 2', new Date());
+  await palacio.buscarLotesAtualizar({
+    encerrando: true,
+    tempoEntreRequisicoes: 5000
+  });
+  console.log('*** Finalizando atualização lotes 2', new Date());
+}, {
+  scheduled: true,
+  timezone: "America/Sao_Paulo"
+});
+
 cron.schedule('*/3 * * * *', async () => {
   console.log('*** Atualizando lotes 2', new Date());
   await palacio.buscarLotesAtualizar({
-    filtroHoras: '2',
-    tempoEntreRequisicoes: 3000
+    filtroHoras: '30',
+    tempoEntreRequisicoes: 5000
   });
   console.log('*** Finalizando atualização lotes 2', new Date());
 }, {
@@ -34,10 +46,22 @@ cron.schedule('*/3 * * * *', async () => {
 });
 
 cron.schedule('*/30 * * * *', async () => {
+  console.log('*** Atualizando lotes 2', new Date());
+  await palacio.buscarLotesAtualizar({
+    filtroHoras: '2',
+    tempoEntreRequisicoes: 21000
+  });
+  console.log('*** Finalizando atualização lotes 2', new Date());
+}, {
+  scheduled: true,
+  timezone: "America/Sao_Paulo"
+});
+
+cron.schedule('45 * * * *', async () => {
   console.log('*** Atualizando lotes 6', new Date());
   await palacio.buscarLotesAtualizar({
     filtroHoras: '6',
-    tempoEntreRequisicoes: 10000
+    tempoEntreRequisicoes: 45000
   });
   console.log('*** Finalizando atualização lotes 6', new Date());
 }, {
@@ -45,11 +69,11 @@ cron.schedule('*/30 * * * *', async () => {
   timezone: "America/Sao_Paulo"
 });
 
-cron.schedule('21 3,18 * * *', async () => {
+cron.schedule('21 8,20 * * *', async () => {
   console.log('*** Atualizando lotes +6', new Date());
   await palacio.buscarLotesAtualizar({
     filtroHoras: '+6',
-    tempoEntreRequisicoes: 30000
+    tempoEntreRequisicoes: 90000
   });
   console.log('*** Finalizando atualização lotes +6', new Date());
 }, {
@@ -57,7 +81,7 @@ cron.schedule('21 3,18 * * *', async () => {
   timezone: "America/Sao_Paulo"
 });
 
-cron.schedule('19 1 * * *', async () => {
+cron.schedule('19 */3 * * *', async () => {
   console.log('*** Buscar lotes', new Date());
   await buscarLotesSalvar();
   console.log('*** Finalizando busca de lotes', new Date());

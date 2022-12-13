@@ -78,7 +78,7 @@ const exec = ({ cheerio, request }) => {
         }
 
         if (nome === 'Previsao') {
-          obj.previsao = tratarDataHora(valor);
+//          obj.previsao = tratarDataHora(valor);
         } else if (nome === 'Lote') {
           obj.lote = Number(valor);
         } else if (!nome.indexOf('Leil') !== 0) {

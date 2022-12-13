@@ -26,7 +26,7 @@ const exec = (params) => {
           set.lote = i.lote;
         }
 
-        if (set !== {}) {
+        if (JSON.stringify(set) != '{}') {
           const atualizado = await update({ colecao, registro: i.registro, set });
 
           console.log(colecao, i.registro, `Registro ${atualizado ? '' : 'não '}atualizado`);
