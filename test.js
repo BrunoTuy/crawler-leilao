@@ -6,4 +6,4 @@ import _db from './db.js';
 const db = await _db();
 const vip = await v({ cheerio, request, db });
 
-vip.buscarListaPrincipal(1);
+vip.buscarListaAtualizarLote(5000);
