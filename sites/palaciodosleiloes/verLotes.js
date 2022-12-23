@@ -58,7 +58,7 @@ const exec = ({ cheerio, request }) => {
       const tds = $(tableInformacoes[idx]).find('td');
 
       if (tds.length === 2) {
-        let nome = $(tds[0]).text().replace(/ /g, "");;
+        let nome = $(tds[0]).text().replace(/ /g, "");
         const valor = $(tds[1]).text().trim();
 
         if (nome.includes('ncia/Cilin')) {
