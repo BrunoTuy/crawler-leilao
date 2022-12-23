@@ -2,7 +2,7 @@ const exec = ({ request, db, cheerio }) => {
   const { update, list, get } = db;
   const colecao = "vipleiloes";
 
-  const buscarAtualizacoesPagina = async ({ registro }) => {
+  const buscarPagina = async ({ registro }) => {
     console.log(colecao, 'Baixar Pagina', registro );
 
     try {
@@ -50,48 +50,34 @@ const exec = ({ request, db, cheerio }) => {
     }
   };
 
-  const buscarAtualizacoesJSON = async ({ registro, dados }) => {
+  const buscarJSON = async ({ registro }) => {
     console.log(colecao, 'Baixar JSON', registro );
 
     try {
       const response = await request.get(`https://api.vipleiloes.com.br/api/leilao/v2/buscaatualizacaolote/${registro}`);
       const jsonResponse = JSON.parse(response);
-      const i = await get({ colecao, registro });
-      const set = {};
-      const lstLances = [];
 
-      Object.entries({ ...jsonResponse, ...dados })
-        .filter(([key]) => !['cacheId', 'id', 'leilaoVeiculoProximoId', 'leilaoVeiculoAnteriorId', 'lances'].includes(key))
-        .forEach(([key, value]) => {
-          if (key && JSON.stringify(i[key]) != JSON.stringify(value)) {
-            set[key] = value;
-          }
-        });
-
-      jsonResponse.lances && jsonResponse.lances.forEach((l) => {
-        if (!i.lances) {
-          i.lances = [];
-        }
-
-        if (!i.lances.push || !i.lances.find(({ valor }) => valor === l.valor)) {
-          lstLances.push(l);
-        }
-      });
-
-      if (lstLances.length > 0) {
-        set.lances = lstLances;
-      }
-
-      return { json: jsonResponse, set };
+      return jsonResponse;
     } catch (e) {
       console.log(colecao, registro, 'Erro ao baixar JSON', e );
     }
   };
 
-  const atualizarRegistro = async ({ registro, setDados }) => {
+  const atualizarRegistro = async ({ registro, dados }) => {
     try {
-      if (JSON.stringify(setDados) != '{}') {
-        const atualizado = await update({ colecao, registro, set: setDados });
+      const dadosBanco = await get({ colecao, registro });
+      const set = {};
+
+      Object.entries(dados)
+        .filter(([key]) => !['cacheId', 'id', 'leilaoVeiculoProximoId', 'leilaoVeiculoAnteriorId', 'lances'].includes(key))
+        .forEach(([key, value]) => {
+          if (key && JSON.stringify(dadosBanco[key]) != JSON.stringify(value)) {
+            set[key] = value;
+          }
+        });
+
+      if (JSON.stringify(set) != '{}') {
+        const atualizado = await update({ colecao, registro, set });
 
         console.log(colecao, registro, `Registro ${atualizado ? '' : 'não '}atualizado`);
       } else {
@@ -105,13 +91,18 @@ const exec = ({ request, db, cheerio }) => {
   const loop = async (lista, idx, timeout) => {
     if (idx >= lista.length) {
       console.log('Fim da lista', `${idx}/${lista.length}`, new Date());
-    } else {
+      return;
+    }
+    try {
+      const { registro } = lista[idx];
       console.log(colecao, `${idx}/${lista.length}`, 'Atualizar lote');
 
-      const pagina = await buscarAtualizacoesPagina(lista[idx]);
-      const { json, set: setDados } = await buscarAtualizacoesJSON({ ...lista[idx], dados: pagina });
-      await atualizarRegistro({ registro: json.id, setDados });
-
+      const pagina = await buscarPagina({ registro });
+      const json = await buscarJSON({ registro });
+      await atualizarRegistro({ registro, dados: { ...pagina, ...json }});
+    } catch (e) {
+      console.log('*** Problema no loop', e);
+    } finally {
       setTimeout(() => loop(lista, idx+1, timeout), timeout);
     }
   }
