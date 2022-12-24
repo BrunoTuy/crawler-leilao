@@ -108,7 +108,7 @@ const exec = ({ request, db, cheerio }) => {
   }
 
   const fnc = async (timeout) => {
-    const listaBanco = await list({ colecao, filtro: {} });
+    const listaBanco = await list({ colecao, filtro: {isEncerrado: {$ne: true}} });
 
     loop(listaBanco, 0, timeout);
   };
