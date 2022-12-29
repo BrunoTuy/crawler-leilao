@@ -95,9 +95,9 @@ const exec = ({ db: { insert, update, list, get } }) => {
         if (JSON.stringify(setDados) != '{}') {
           const atualizado = await update({ colecao: colecaoDestino, registro, set: setDados });
 
-          console.log(colecaoDestino, registro, `Registro ${atualizado ? '' : 'não '}atualizado`);
+          console.log(colecaoDestino, `${idx+1}/${lista.length}`, registro, `Registro ${atualizado ? '' : 'não '}atualizado`);
         } else {
-          console.log(colecaoDestino, registro, 'Registro sem atualizações');
+          console.log(colecaoDestino, `${idx+1}/${lista.length}`, registro, 'Registro sem atualizações');
         }
       } else {
         dadosPadronizados.site = 'palaciodosleiloes.com.br'
