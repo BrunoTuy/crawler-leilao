@@ -6,4 +6,4 @@ import _db from './db.js';
 const db = await _db();
 const palacio = await p({ cheerio, request, db });
 
-palacio.migrarDados();
+palacio.migrarDados(db.close);
