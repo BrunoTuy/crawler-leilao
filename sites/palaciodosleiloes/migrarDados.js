@@ -25,20 +25,20 @@ const exec = ({ db: { insert, update, list, get } }) => {
     delete(dados._id);
     delete(dados.log);
 
-    const km = isNaN(KM) ? KM : Number(KM.replace('.', ''));
     const {
       data: ultimoLanceData,
       valor: ultimoLanceValor
     } = (lances || [{}]).pop();
 
-    return {
+    const retorno = {};
+    const objeto = {
       registro,
       vendedor,
       vendedorTipo,
       veiculo,
       combustivel,
       ano,
-      km,
+      km: isNaN(KM) ? KM : Number(KM.replace('.', '')),
       situacao,
       acessorios: (Acessorios || '').split(','),
       descricao,
@@ -51,6 +51,14 @@ const exec = ({ db: { insert, update, list, get } }) => {
       encerrado,
       original: dados
     };
+
+    Object.entries(objeto).forEach(([key, value]) => {
+      if (value) {
+        retorno[key] = value;
+      }
+    });
+
+    return retorno;
   }
 
   const salvarLista = async (lista, idx, cb) => {
@@ -63,6 +71,7 @@ const exec = ({ db: { insert, update, list, get } }) => {
 
       const item = lista[idx];
       const dadosPadronizados = dadosItem(item);
+
       registro = item.registro;
 
       const itemBanco = await get({ colecao: colecaoDestino, registro });
@@ -93,7 +102,7 @@ const exec = ({ db: { insert, update, list, get } }) => {
       } else {
         dadosPadronizados.site = 'palaciodosleiloes.com.br'
 
-        const id = await insert({ colecao: colecaoDestino, dadosPadronizados });
+        const id = await insert({ colecao: colecaoDestino, dados: dadosPadronizados });
 
         console.log(colecaoOrigem, `${idx+1}/${lista.length}`, registro, 'Cadastro feito', id);
       }
@@ -112,7 +121,7 @@ const exec = ({ db: { insert, update, list, get } }) => {
 
     console.log('--- Lista origem', listaOrigem.length);
 
-    salvarLista([listaOrigem[0]], 0, cb);
+    salvarLista(listaOrigem, 0, cb);
   };
 
   return fnc;
