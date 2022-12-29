@@ -63,11 +63,12 @@ const exec = async () => {
     try {
       const collection = db.collection(colecao);
       const resposta = await collection.insertOne({
+        criadoEm: new Date(),
         ...dados,
         log: [{
           momento: new Date(),
           acao: 'insert',
-          dadoSite: dados
+          dadoSalvo: dados
         }]
       });
 
@@ -102,6 +103,7 @@ const exec = async () => {
         acao: 'update',
         dadoSalvo: JSON.stringify(set)
       }]);
+      set.atualizadoEm = new Date();
 
       const resposta = await collection.updateOne({ _id: new ObjectId(i._id.toString()) }, { $set: set });
 
