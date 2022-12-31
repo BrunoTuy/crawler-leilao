@@ -1,7 +1,9 @@
 import buscarListaPrincipal from './buscarListaPrincipal.js';
 import buscarListaAtualizarLote from './buscarListaAtualizarLote.js';
+import migrarDados from './migrarDados.js';
 
 export default (params) => ({
   buscarListaPrincipal: buscarListaPrincipal(params),
-  buscarListaAtualizarLote: buscarListaAtualizarLote(params)
+  buscarListaAtualizarLote: buscarListaAtualizarLote(params),
+  migrarDados: migrarDados(params)
 });
