@@ -27,7 +27,9 @@ const exec = ({ db: { insert, update, list, get } }) => {
     const km = (KM || '').trim().split(' ')[0];
     let vendedorTipo = null;
 
-    if (vendedor.includes('SEGURO')) {
+    if (!vendedor) {
+      vendedorTipo = null;
+    } else if (vendedor.includes('SEGURO')) {
       vendedorTipo = 'seguradora';
     } else if (vendedor.includes('BANCO') || vendedor.includes('FINANCIA') || vendedor.includes('CONSORCIO')) {
       vendedorTipo = 'financeira';
