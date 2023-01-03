@@ -25,12 +25,23 @@ const exec = ({ db: { insert, update, list, get } }) => {
     delete(dados.log);
 
     const km = (KM || '').trim().split(' ')[0];
+    let vendedorTipo = null;
+
+    if (vendedor.includes('SEGURO')) {
+      vendedorTipo = 'seguradora';
+    } else if (vendedor.includes('BANCO') || vendedor.includes('FINANCIA') || vendedor.includes('CONSORCIO')) {
+      vendedorTipo = 'financeira';
+    } else if (vendedor.includes('CTTU') || vendedor.includes('PRF') || vendedor.includes('DETRAN') || vendedor.includes('SMDT')) {
+      vendedorTipo = 'rodoviaria';
+    } else if (vendedor.includes('UFPI') || vendedor.includes('EQUATORIAL ENERGIA')) {
+      vendedorTipo = 'frota';
+    }
 
     const retorno = {};
     const objeto = {
       registro,
       vendedor,
-      vendedorTipo: null,
+      vendedorTipo,
       veiculo,
       combustivel,
       ano,
