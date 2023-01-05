@@ -54,7 +54,7 @@ const exec = async () => {
 
       return listaBanco;
     } catch (e) {
-      console.log(colecao, dados.registro, 'Erro na busca', e);
+      console.log(colecao, 'Erro na busca', e);
       return false;
     }
   };
