@@ -59,6 +59,44 @@ const exec = async () => {
     }
   };
 
+  const salvarLista = async (lista) => {
+    const colecao = 'veiculos';
+    lista.forEach(async (i, idx) => {
+      const { registro } = i;
+      const itemBanco = await get({ colecao, registro });
+
+      if (itemBanco) {
+        const setDados = {};
+
+        Object.entries(i)
+          .filter(([key]) => !['original'].includes(key))
+          .forEach(([key, value]) => {
+            if (key && JSON.stringify(itemBanco[key]) != JSON.stringify(value)) {
+              setDados[key] = value;
+            }
+          });
+
+        Object.entries(i.original).forEach(([key, value]) => {
+          if (key && JSON.stringify(itemBanco.original[key]) != JSON.stringify(value)) {
+            setDados[`original.${key}`] = value;
+          }
+        });
+
+        if (JSON.stringify(setDados) != '{}') {
+          const atualizado = await update({ colecao, registro, set: setDados });
+
+          console.log(`${idx+1}/${lista.length}`, registro, `Registro ${atualizado ? '' : 'não '}atualizado`);
+        } else {
+          console.log(`${idx+1}/${lista.length}`, registro, 'Registro sem atualizações');
+        }
+      } else {
+        const id = await insert({ colecao, dados: i });
+
+        console.log(`${idx+1}/${lista.length}`, registro, 'Cadastro feito', id);
+      }
+    });
+  };
+
   const insert = async ({ colecao, dados }) => {
     try {
       const collection = db.collection(colecao);
@@ -123,7 +161,8 @@ const exec = async () => {
     get,
     list,
     insert,
-    update
+    update,
+    salvarLista
   };
 }
 
