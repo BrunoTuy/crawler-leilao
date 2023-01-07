@@ -5,6 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "dev": "nodemon api.js",
+    "start:api": "pm2 start api.js",
     "start:palacio": "pm2 start palaciodosleiloes.js",
     "start:vipleiloes": "pm2 start vipleiloes.js",
     "db:up": "docker-compose up -d db",
@@ -29,11 +31,17 @@
   "homepage": "https://github.com/BrunoTuy/crawler-leilao#readme",
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
     "image-downloader": "^4.3.0",
     "mongodb": "^4.12.1",
     "node-cron": "^3.0.2",
     "pm2": "^5.2.2",
     "request": "^2.88.2",
-    "request-promise": "^4.2.6"
+    "request-promise": "^4.2.6",
+    "serve-static": "^1.15.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
   }
 }

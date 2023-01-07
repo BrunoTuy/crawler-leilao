@@ -47,14 +47,14 @@ const exec = async () => {
     return listaBanco;
   }
 
-  const list = async ({ colecao, filtro }) => {
+  const list = async ({ colecao, filtro, colunas }) => {
     try {
       const collection = db.collection(colecao);
-      const listaBanco = await collection.find(filtro).toArray();
+      const listaBanco = await collection.find(filtro).project(colunas).toArray();
 
       return listaBanco;
     } catch (e) {
-      console.log(colecao, dados.registro, 'Erro na busca', e);
+      console.log(colecao, 'Erro na busca', e);
       return false;
     }
   };
