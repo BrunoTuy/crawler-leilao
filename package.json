@@ -9,6 +9,7 @@
     "start:api": "pm2 start api.js",
     "start:palacio": "pm2 start palaciodosleiloes.js",
     "start:vipleiloes": "pm2 start vipleiloes.js",
+    "start:milanleiloes": "pm2 start milanleiloes.js",
     "db:up": "docker-compose up -d db",
     "db:down": "docker-compose down",
     "db:delete": "docker-compose down -v",
