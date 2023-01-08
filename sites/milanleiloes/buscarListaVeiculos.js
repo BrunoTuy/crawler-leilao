@@ -1,6 +1,4 @@
-const exec = params => {
-  const { cheerio, request, db: { salvarLista } } = params;
-
+const exec = ({ cheerio, request, db: { salvarLista } }) => {
   const listaLeiloes = async () => {
     console.log('Baixar lista de leilões' );
 
@@ -71,8 +69,15 @@ const exec = params => {
     setTimeout(() => paginaListaVeiculos({ leilao, data: dataInicio }, lista, pagina+1), 5000);
   };
 
-  const listaVeiculos = async (dados) => {
-    console.log('Baixar lista de veiculos' );
+  const listaVeiculos = async (lista, idx) => {
+    if (idx >= lista.length) {
+      console.log('Fim gatilho busca de lista' );
+      return;
+    }
+
+    const dados = lista[idx];
+
+    console.log(`Baixar lista de veiculos - ${idx+1}/${lista.length}` );
 
     try {
       const response = await request.get(`https://www.milanleiloes.com.br/Leiloes/Catalogo.asp?IdLeilao=${dados.leilao}`);
@@ -83,24 +88,26 @@ const exec = params => {
       eval(comando);
 
       $('div.cabecalho-infoLeilao p').each((index, p) => {
-        if ($(p).text().includes('Local do Leilão')) {
-          dados.localDoLeilao = $(p).text().replace('Local do Leilão:', '').trim();
-        } else if ($(p).text().includes('Visitação')) {
-          dados.visitacao = $(p).text().replace('Visitação:', '').trim();
+        if ($(p).text().includes('Local do Leil')) {
+          dados.localDoLeilao = $(p).text().split(':')[1].trim();
+        } else if ($(p).text().includes('Visita')) {
+          dados.visitacao = $(p).text().split(':')[1].trim();
         }
       });
 
-
       paginaListaVeiculos(dados, Leilao.lotesPaginas, 0);
+
     } catch (e) {
       console.log('Error', e);
+    } finally {
+      setTimeout(() => listaVeiculos(lista, idx+1), 1255);
     }
   };
 
   const fnc = async () => {
     const leiloes = await listaLeiloes();
 
-    listaVeiculos(leiloes[0]);
+    listaVeiculos(leiloes, 0);
   };
 
   return fnc;
