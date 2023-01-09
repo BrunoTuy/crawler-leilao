@@ -61,7 +61,9 @@ const exec = async () => {
 
   const salvarLista = async (lista) => {
     const colecao = 'veiculos';
-    lista.forEach(async (i, idx) => {
+
+    for (let idx = 0; idx < lista.length; idx++) {
+      const i = lista[idx];
       const { registro } = i;
       const itemBanco = await get({ colecao, registro });
 
@@ -94,7 +96,7 @@ const exec = async () => {
 
         console.log(`${idx+1}/${lista.length}`, registro, 'Cadastro feito', id);
       }
-    });
+    };
   };
 
   const insert = async ({ colecao, dados }) => {

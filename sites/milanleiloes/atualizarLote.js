@@ -67,7 +67,7 @@ const exec = ({ cheerio, request, db: { salvarLista, list } }) => {
     }
   };
 
-  const acessarLote = async (lista, idx) => {
+  const atualizarLote = async (lista, idx, time) => {
     console.log(`Buscar lote - ${idx+1}/${lista.length}`);
     const i = lista[idx];
     const { registro } = i;
@@ -81,23 +81,24 @@ const exec = ({ cheerio, request, db: { salvarLista, list } }) => {
         ...jsonLances
       });
 
-      console.log('--- resposta json', dados);
+      await salvarLista([dados]);
+      console.log(`${idx+1}/${lista.length}`, registro, 'Atualizado');
     } catch (e) {
       console.log('Erro buscando lote', registro, e);
     } finally {
       idx++;
       if (idx < lista.length) {
-        setTimeout(() => acessarLote(lista, idx), 5000);
+        setTimeout(() => atualizarLote(lista, idx, time), time);
       } else {
         console.log('---- FIM DA LISTA ----')
       }
     }
   };
 
-  const fnc = async () => {
+  const fnc = async (time) => {
     const lista = await buscarLotes();
 
-    acessarLote([lista[0]], 0)
+    atualizarLote(lista, 0, time)
   };
 
   return fnc;
