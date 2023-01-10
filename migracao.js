@@ -8,4 +8,4 @@ const db = await _db();
 const palacio = await p({ cheerio, request, db });
 const vip = await v({ cheerio, request, db });
 
-palacio.migrarDados(() => vip.migrarDados(db.close));
+palacio.migrarDados(db.close);
