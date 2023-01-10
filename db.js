@@ -64,8 +64,8 @@ const exec = async () => {
 
     for (let idx = 0; idx < lista.length; idx++) {
       const i = lista[idx];
-      const { registro } = i;
-      const itemBanco = await get({ colecao, registro });
+      const { registro, site } = i;
+      const itemBanco = await get({ colecao, registro, site });
 
       if (itemBanco) {
         const setDados = {};
@@ -119,10 +119,16 @@ const exec = async () => {
     }
   };
 
-  const get = async ({ colecao, registro }) => {
+  const get = async ({ colecao, registro, site }) => {
     try {
       const collection = db.collection(colecao);
-      const i = await collection.findOne({ registro });
+      const filtro = { registro };
+
+      if (site) {
+        filtro.site = site;
+      }
+
+      const i = await collection.findOne(filtro);
 
       return i;
     } catch (e) {
