@@ -1,6 +1,75 @@
 const exec = ({ request, db, cheerio }) => {
-  const { update, list, get } = db;
+  const { list, salvarLista } = db;
   const colecao = "vipleiloes";
+
+  const dadosItem = (dados) => {
+    const {
+      registro,
+      isEncerrado: encerrado,
+      Veiculo: veiculo,
+      origem: vendedor,
+      LocalLote: localLote,
+      leilaoDataInicio: dataInicio,
+      opcionais: acessorios,
+      Ano: ano,
+      Combustivel: combustivel,
+      Situacao,
+      SituacaodeEntrada,
+      dataLance: ultimoLanceData,
+      ultimoLance: ultimoLanceValor,
+      KM,
+      observacoes: descricao,
+    } = dados;
+
+    delete(dados._id);
+    delete(dados.log);
+
+    const km = (KM || '').trim().split(' ')[0];
+    let vendedorTipo = null;
+
+    if (!vendedor) {
+      vendedorTipo = null;
+    } else if (vendedor.includes('SEGURO')) {
+      vendedorTipo = 'seguradora';
+    } else if (vendedor.includes('BANCO') || vendedor.includes('FINANCIA') || vendedor.includes('CONSORCIO')) {
+      vendedorTipo = 'financeira';
+    } else if (vendedor.includes('CTTU') || vendedor.includes('PRF') || vendedor.includes('DETRAN') || vendedor.includes('SMDT')) {
+      vendedorTipo = 'rodoviaria';
+    } else if (vendedor.includes('UFPI') || vendedor.includes('EQUATORIAL ENERGIA')) {
+      vendedorTipo = 'frota';
+    }
+
+    const retorno = {};
+    const objeto = {
+      registro,
+      site: 'vipleiloes.com.br',
+      vendedor,
+      vendedorTipo,
+      veiculo,
+      combustivel,
+      ano,
+      km: isNaN(km) ? km : Number(km.replace('.', '')),
+      situacao: `${Situacao} - ${SituacaodeEntrada}`,
+      acessorios,
+      descricao,
+      fotos: [],
+      ultimoLanceData,
+      ultimoLanceValor,
+      localLote,
+      localLeilao: null,
+      dataInicio,
+      encerrado,
+      original: dados
+    };
+
+    Object.entries(objeto).forEach(([key, value]) => {
+      if (value) {
+        retorno[key] = value;
+      }
+    });
+
+    return retorno;
+  }
 
   const buscarPagina = async ({ registro }) => {
     console.log(colecao, 'Baixar Pagina', registro );
@@ -63,31 +132,6 @@ const exec = ({ request, db, cheerio }) => {
     }
   };
 
-  const atualizarRegistro = async ({ registro, dados }) => {
-    try {
-      const dadosBanco = await get({ colecao, registro });
-      const set = {};
-
-      Object.entries(dados)
-        .filter(([key]) => !['cacheId', 'id', 'leilaoVeiculoProximoId', 'leilaoVeiculoAnteriorId', 'lances'].includes(key))
-        .forEach(([key, value]) => {
-          if (key && JSON.stringify(dadosBanco[key]) != JSON.stringify(value)) {
-            set[key] = value;
-          }
-        });
-
-      if (JSON.stringify(set) != '{}') {
-        const atualizado = await update({ colecao, registro, set });
-
-        console.log(colecao, registro, `Registro ${atualizado ? '' : 'não '}atualizado`);
-      } else {
-        console.log(colecao, registro, 'Registro sem atualizações');
-      }
-    } catch (e) {
-      console.log(colecao, registro, 'Erro salvando o registro', e );
-    }
-  };
-
   const loop = async (lista, idx, timeout) => {
     if (idx >= lista.length) {
       console.log('Fim da lista', `${idx}/${lista.length}`, new Date());
@@ -99,7 +143,13 @@ const exec = ({ request, db, cheerio }) => {
 
       const pagina = await buscarPagina({ registro });
       const json = await buscarJSON({ registro });
-      await atualizarRegistro({ registro, dados: { ...pagina, ...json }});
+      const dados = dadosItem({
+        registro,
+        ...pagina,
+        ...json
+      });
+
+      await salvarLista([dados]);
     } catch (e) {
       console.log('*** Problema no loop', e);
     } finally {
