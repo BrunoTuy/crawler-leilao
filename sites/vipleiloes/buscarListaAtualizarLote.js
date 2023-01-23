@@ -1,6 +1,6 @@
 const exec = ({ request, db, cheerio }) => {
   const { list, salvarLista } = db;
-  const colecao = "vipleiloes";
+  const colecao = "veiculos";
 
   const dadosItem = (dados) => {
     const {
@@ -158,7 +158,7 @@ const exec = ({ request, db, cheerio }) => {
   }
 
   const fnc = async (timeout) => {
-    const listaBanco = await list({ colecao, filtro: {isEncerrado: {$ne: true}} });
+    const listaBanco = await list({ colecao, filtro: {site: 'vipleiloes.com.br', encerrado: {$ne: true}} });
 
     loop(listaBanco, 0, timeout);
   };
