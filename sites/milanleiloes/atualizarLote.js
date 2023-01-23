@@ -27,6 +27,10 @@ const exec = ({ cheerio, request, db: { salvarLista, list } }) => {
       dado.descricao = o.descricao;
       dado.fotos = o.fotos.map(f => ({ url: `https://www.milanleiloes.com.br/Fotos/${o.registro.leilao}/${f}` }));
 
+      if (o.estadoLote && (['Vendido', 'Venda Recusada', 'Venda Aceita'].includes(o.estadoLote) || o.estadoLote.includes('Vendido'))) {
+        dado.encerrado = true;
+      }
+
       if (dado.vendedor.includes('SEGURO')) {
         dado.vendedorTipo = 'seguradora';
       } else if (dado.vendedor.includes('BANCO') || dado.vendedor.includes('FINANCIA') || dado.vendedor.includes('CONSORCIO')) {
