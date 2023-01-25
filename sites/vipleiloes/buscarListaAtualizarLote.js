@@ -20,6 +20,7 @@ const exec = ({ request, db, cheerio }) => {
       KM,
       observacoes: descricao,
       fotos,
+      statusVeiculoLeilao,
     } = dados;
 
     delete(dados._id);
@@ -62,6 +63,12 @@ const exec = ({ request, db, cheerio }) => {
       encerrado,
       original: dados
     };
+
+    if (statusVeiculoLeilao === 6) {
+      objeto.status = 'CONDICIONAL';
+    } else if (statusVeiculoLeilao === 3) {
+      objeto.status = 'VENDIDO';
+    }
 
     Object.entries(objeto).forEach(([key, value]) => {
       if (value) {
