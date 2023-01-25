@@ -81,7 +81,7 @@ const exec = ({ request, db, cheerio }) => {
 
       const dados = {opcionais: [], fotos: []};
 
-      const fotos = $('div.carousel-inner div img');
+      const fotos = $('div#imagens img');
       const tabela = $(' div.tabs div.tab-content div.tab-content');
       const informacoes = $('#tab1 div.row');
       const opcionais = $('#tab2 p');
@@ -109,9 +109,13 @@ const exec = ({ request, db, cheerio }) => {
 
       for (let x = 0; x < fotos.length; x++) {
         const it = $(fotos[x]).attr('src');
-        const ft = it.substring(it.indexOf('https'));
 
-        dados.fotos.push(ft);
+        if (it.includes('.jpg')) {
+          const ft = it.substring(it.indexOf('https'));
+
+          dados.fotos.push(ft);
+
+        }
       }
 
       for (let x = 0; x < opcionais.length; x++) {
