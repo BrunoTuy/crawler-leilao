@@ -19,6 +19,7 @@ const exec = ({ request, db, cheerio }) => {
       ultimoLance: ultimoLanceValor,
       KM,
       observacoes: descricao,
+      fotos,
     } = dados;
 
     delete(dados._id);
@@ -52,7 +53,7 @@ const exec = ({ request, db, cheerio }) => {
       situacao: `${Situacao} - ${SituacaodeEntrada}`,
       acessorios,
       descricao,
-      fotos: [],
+      fotos: fotos.map(url => ({ url })),
       ultimoLanceData,
       ultimoLanceValor,
       localLote,
@@ -78,8 +79,9 @@ const exec = ({ request, db, cheerio }) => {
       const response = await request.get(`https://www.vipleiloes.com.br/Veiculos/DetalharVeiculo/${registro}`);
       const $ = cheerio.load(response);
 
-      const dados = {opcionais: []};
+      const dados = {opcionais: [], fotos: []};
 
+      const fotos = $('div.carousel-inner div img');
       const tabela = $(' div.tabs div.tab-content div.tab-content');
       const informacoes = $('#tab1 div.row');
       const opcionais = $('#tab2 p');
@@ -103,6 +105,13 @@ const exec = ({ request, db, cheerio }) => {
             dados[nome.replace(/ /g, "").replace(':', '').replace('í', 'i').replace('ç', 'c').replace('ã', 'a')] = valor;
           }
         }
+      }
+
+      for (let x = 0; x < fotos.length; x++) {
+        const it = $(fotos[x]).attr('src');
+        const ft = it.substring(it.indexOf('https'));
+
+        dados.fotos.push(ft);
       }
 
       for (let x = 0; x < opcionais.length; x++) {
