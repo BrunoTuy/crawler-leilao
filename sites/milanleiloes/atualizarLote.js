@@ -31,6 +31,10 @@ const exec = ({ cheerio, request, db: { salvarLista, list } }) => {
         dado.encerrado = true;
       }
 
+      if (['vendido', 'venda aceita'].includes(o.estadoLote.toLowerCase())) {
+        retorno.status = 'VENDIDO';
+      }
+
       if (dado.vendedor.includes('SEGURO')) {
         dado.vendedorTipo = 'seguradora';
       } else if (dado.vendedor.includes('BANCO') || dado.vendedor.includes('FINANCIA') || dado.vendedor.includes('CONSORCIO')) {

@@ -49,6 +49,7 @@ const exec = ({ cheerio, request, db: { salvarLista } }) => {
 
       listaSalvar.push({
         site: 'milanleiloes.com.br',
+        link: `https://www.milanleiloes.com.br/Leiloes/Lance/lote.asp?CL=${leilao}#Lote=${registro.lote}`,
         registro,
         veiculo,
         ultimoLanceValor,
