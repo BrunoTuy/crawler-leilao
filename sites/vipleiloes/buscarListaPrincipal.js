@@ -36,6 +36,7 @@ const exec = params => {
         dados.original.bem = $(body).find('h4.itm-name').text().replace(/\n/g, ' ').trim();
         dados.veiculo = dados.original.bem;
         dados.site = 'vipleiloes.com.br';
+        dados.link = `https://www.vipleiloes.com.br${dados.original.url}`;
 
         if (!lista.find(({ registro }) => registro === dados.registro )) {
           lista.push(dados);

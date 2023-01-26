@@ -1,12 +1,16 @@
 const exec = ({ db: { insert, update, list, get } }) => {
   const colecao = "veiculos";
 
-  const dadosItem = ({ original }) => {
+  const dadosItem = ({ original: { statusVeiculoLeilao, url } }) => {
     const retorno = {};
 
-    if (original.statusVeiculoLeilao === 6) {
+    if (url) {
+      retorno.link = `https://www.vipleiloes.com.br${url}`;
+    }
+
+    if (statusVeiculoLeilao === 6) {
       retorno.status = 'CONDICIONAL';
-    } else if (original.statusVeiculoLeilao === 3) {
+    } else if (statusVeiculoLeilao === 3) {
       retorno.status = 'VENDIDO';
     }
 
