@@ -1,5 +1,4 @@
-const exec = params => {
-  const { cheerio, request, db } = params;
+const exec = ({ cheerio, request, db }) => {
   const { salvarLista } = db;
   const colecao = "veiculos";
 
