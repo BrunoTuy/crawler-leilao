@@ -95,7 +95,7 @@ const exec = ({ cheerio, request, db: { salvarLista } }) => {
         dado.ultimoLance = $(divs[15]).text().indexOf("ltimo") > 0 ? $(divs[16]).text() : null;
         dado.bem = $(divs[17]).text();
         dado.origem = $(divs[18]).text();
-        dado.descricao = $(divs[18]).text();
+        dado.descricao = $(divs[19]).text();
       } else if (divs.length === 18) {
         dado.lote = $(divs[1]).text() === "Lote" ? $(divs[2]).text() : null;
         dado.local = $(divs[3]).text() === "Local" ? $(divs[4]).text() : null;

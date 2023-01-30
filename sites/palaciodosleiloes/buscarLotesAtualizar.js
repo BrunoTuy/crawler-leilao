@@ -31,11 +31,6 @@ const dadosItem = (dados) => {
   delete(dados._id);
   delete(dados.log);
 
-  const {
-    data: ultimoLanceData,
-    valor: ultimoLanceValor
-  } = (lances || [{}]).pop();
-
   const retorno = {};
   const objeto = {
     registro,
@@ -48,15 +43,20 @@ const dadosItem = (dados) => {
     situacao,
     acessorios: (Acessorios || '').split(','),
     descricao,
-    fotos,
-    ultimoLanceData,
-    ultimoLanceValor,
+    fotos: fotos.map(url => ({ url })),
     localLote,
     localLeilao,
     dataInicio,
     encerrado,
     original: dados
   };
+
+  if (lances.length > 0) {
+    const ultimoLance = lances.pop();
+
+    objeto.ultimoLanceData = ultimoLance.data;
+    objeto.ultimoLanceValor = ultimoLance.valor;
+  }
 
   Object.entries(objeto).forEach(([key, value]) => {
     if (value) {
