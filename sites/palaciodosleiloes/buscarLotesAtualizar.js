@@ -153,20 +153,20 @@ const exec = ({ cheerio, request, db: { list, get, salvarLista } }) => {
 
 
   const verificarEncerrando = async (registro) => {
-    const dados = {};
+    const dados = {original: {}};
     const { encerrado, original: o } = await get({ colecao, site, registro });
 
     if (encerrado === true && o.encerrado === true) {
       console.log(registro, 'Registro já encerrado');
     } else if (!isNaN(o.encerrado)) {
-      dados['original.encerrado'] = ++o.encerrado;
+      dados.original.encerrado = ++o.encerrado;
     } else {
-      dados['original.encerrado'] = 1;
+      dados.original.encerrado = 1;
     }
 
-    if (dados['original.encerrado'] > 5) {
+    if (dados.original.encerrado > 5) {
       dados.encerrado = true;
-      dados['original.encerrado'] = true;
+      dados.original.encerrado = true;
     }
 
     return dados;
@@ -185,13 +185,15 @@ const exec = ({ cheerio, request, db: { list, get, salvarLista } }) => {
 
     try {
       const informacoesSite = await baixarPagina(registro);
-      const dados = informacoesSite.encerrado
-        ? verificarEncerrando(registro)
+      const setDados = informacoesSite.encerrado
+        ? await verificarEncerrando(registro)
         : dadosItem(informacoesSite);
 
-      dados.registro = registro;
-
-      await salvarLista([dados]);
+      await salvarLista([{
+        ...setDados,
+        registro,
+        site,
+      }]);
     } catch (e) {
       console.log(registro, 'Erro na atualização', e);
     }
