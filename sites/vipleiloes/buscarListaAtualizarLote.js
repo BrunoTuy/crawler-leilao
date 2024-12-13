@@ -54,7 +54,7 @@ const exec = ({ request, db, cheerio }) => {
       situacao: `${Situacao} - ${SituacaodeEntrada}`,
       acessorios,
       descricao,
-      fotos: fotos.map(url => ({ url })),
+      fotos: (fotos || []).map(url => ({ url })),
       ultimoLanceData,
       ultimoLanceValor,
       localLote,
@@ -115,13 +115,12 @@ const exec = ({ request, db, cheerio }) => {
       }
 
       for (let x = 0; x < fotos.length; x++) {
-        const it = $(fotos[x]).attr('src');
+        const it = $(fotos[x]).attr('data-cfsrc');
 
-        if (it.includes('.jpg')) {
+        if (it && it.includes('.jpg')) {
           const ft = it.substring(it.indexOf('https'));
 
           dados.fotos.push(ft);
-
         }
       }
 
