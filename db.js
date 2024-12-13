@@ -59,7 +59,7 @@ const exec = async () => {
     }
   };
 
-  const salvarLista = async (lista) => {
+  const salvarLista = async (lista, debugUpdate) => {
     const colecao = 'veiculos';
 
     for (let idx = 0; idx < lista.length; idx++) {
@@ -85,7 +85,7 @@ const exec = async () => {
         });
 
         if (JSON.stringify(setDados) != '{}') {
-          const atualizado = await update({ colecao, registro, set: setDados });
+          const atualizado = await update({ colecao, registro, set: setDados, debugUpdate });
 
           console.log(`${idx+1}/${lista.length}`, registro, `Registro ${atualizado ? '' : 'não '}atualizado`);
         } else {
@@ -137,12 +137,12 @@ const exec = async () => {
     }
   };
 
-  const update = async ({ colecao, registro, set }) => {
+  const update = async ({ colecao, registro, set, debugUpdate }) => {
     try {
       const collection = db.collection(colecao);
       const i = await collection.findOne({ registro });
 
-      console.log('UPDATE', registro, set);
+      debugUpdate && console.log('UPDATE', registro, set);
 
       set.log = (i.log || []).concat([{
         momento: new Date(),
