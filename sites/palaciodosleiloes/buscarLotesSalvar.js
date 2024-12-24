@@ -1,4 +1,7 @@
 import tratarDataHora from './_tratarDataHora.js';
+import axios from 'axios';
+import FormData from 'form-data';
+
 
 const exec = ({ cheerio, request, db: { salvarLista } }) => {
   const dadosItem = (dados) => {
@@ -26,9 +29,14 @@ const exec = ({ cheerio, request, db: { salvarLista } }) => {
       valor: ultimoLanceValor
     } = (lances || [{}]).pop();
 
-    const retorno = {};
+    const retorno = {
+      site: 'palaciodosleiloes.com.br',
+      encerrado: false
+    };
+
     const objeto = {
       registro,
+      link: `https://www.palaciodosleiloes.com.br/site/lotem.php?cl=${registro.lote}`,
       vendedor,
       vendedorTipo,
       veiculo,
@@ -58,18 +66,38 @@ const exec = ({ cheerio, request, db: { salvarLista } }) => {
   };
 
   const listarLotes = async () => {
-    const response = await request.post('https://www.palaciodosleiloes.com.br/camada_ajax/lotes.php', {
-      form: {
-        opcao: "busca_lotes",
-        categoria_pesquisa: "1",
-        tipo_exibicao_pesquisa: "lista"
-      }
+    const { data } = await axios.postForm('https://www.palaciodosleiloes.com.br/site/camada_ajax/coluna_esquerda_m.php?quebra=0.6543214025681199&&opcao=listar_lote&categoria_pesquisa=1&subcategoria_pesquisa=&marca_pesquisa=&situacao_pesquisa=&local_pesquisa=&modelo_pesquisa=&ano_pesquisa=&grupo_site_pesquisa=&txt_pesquisa_lote=&leilao_pesquisa=&tipo_exibicao=grid&paginacao=-1&total_paginas=1&somente_pesquisa=0&e_categoria=1&e_leilao=1&e_subcategoria=0&e_marca=0&e_modelo=0&e_ano=0&e_situacao=0&e_local=0&e_grupo=0', {
+      quebra: '0.6543214025681199',
+      opcao: 'listar_lote',
+      categoria_pesquisa: '1',
+      subcategoria_pesquisa: '',
+      marca_pesquisa: '',
+      situacao_pesquisa: '',
+      local_pesquisa: '',
+      modelo_pesquisa: '',
+      ano_pesquisa: '',
+      grupo_site_pesquisa: '',
+      txt_pesquisa_lote: '',
+      leilao_pesquisa: '',
+      tipo_exibicao: 'grid',
+      paginacao: '-1',
+      total_paginas: '1',
+      somente_pesquisa: '0',
+      e_categoria: '1',
+      e_leilao: '1',
+      e_subcategoria: '0',
+      e_marca: '0',
+      e_modelo: '0',
+      e_ano: '0',
+      e_situacao: '0',
+      e_local: '0',
+      e_grupo: '0'
     });
 
-    const $ = cheerio.load(response);
+    const $ = cheerio.load(data);
     const lista = [];
 
-    $('tr').each((index, tr) => {
+    $('div.col-md-3').each((index, tr) => {
       const onclick = $(tr).attr('onclick');
 
       if (!onclick) {
@@ -84,30 +112,19 @@ const exec = ({ cheerio, request, db: { salvarLista } }) => {
       };
 
       const divs = $(tr).find('div');
-      if (divs.length === 20) {
-        dado.sequencia = $(divs[1]).text().indexOf("Sequ") > -1 ? Number($(divs[2]).text()) : null;
-        dado.lote = $(divs[3]).text() === "Lote" ? $(divs[4]).text() : null;
-        dado.local = $(divs[5]).text() === "Local" ? $(divs[6]).text() : null;
-        dado.totalVisualizacoes = $(divs[7]).text().indexOf("Visualiza") > -1 ? $(divs[8]).text() : null;
-        dado.totalLances = $(divs[9]).text() === "Lances" ? $(divs[10]).text() : null;
-        dado.realizacao = $(divs[11]).text().indexOf("Realiza") > -1 ? tratarDataHora($(divs[12]).text()) : null;
-        dado.previsao = $(divs[13]).text().indexOf("Previs") > -1 ? tratarDataHora($(divs[14]).text()) : null;
-        dado.ultimoLance = $(divs[15]).text().indexOf("ltimo") > 0 ? $(divs[16]).text() : null;
-        dado.bem = $(divs[17]).text();
-        dado.origem = $(divs[18]).text();
-        dado.descricao = $(divs[19]).text();
-      } else if (divs.length === 18) {
-        dado.lote = $(divs[1]).text() === "Lote" ? $(divs[2]).text() : null;
-        dado.local = $(divs[3]).text() === "Local" ? $(divs[4]).text() : null;
-        dado.totalVisualizacoes = $(divs[5]).text().indexOf("Visualiza") > -1 ? $(divs[6]).text() : null;
-        dado.totalLances = $(divs[7]).text() === "Lances" ? $(divs[8]).text() : null;
-        dado.realizacao = $(divs[9]).text().indexOf("Realiza") > -1 ? tratarDataHora($(divs[10]).text()) : null;
-        dado.previsao = $(divs[11]).text().indexOf("Previs") > -1 ? tratarDataHora($(divs[12]).text()) : null;
-        dado.ultimoLance = $(divs[13]).text().indexOf("ltimo") > 0 ? $(divs[14]).text() : null;
-        dado.bem = $(divs[15]).text();
-        dado.origem = $(divs[16]).text();
-        dado.descricao = $(divs[17]).text();
-      }
+
+      dado.origem = $(divs[3]).text().trim();
+      dado.bem = $(divs[4]).text().trim();
+      dado.ano = $(divs[5]).text();
+      dado.descricao = $(divs[6]).text();
+      dado.local = $(divs[7]).text();
+      dado.previsao = $(divs[8]).text().indexOf("Data") > -1 ? tratarDataHora($(divs[9]).text()) : null;
+      dado.leilao = $(divs[10]).text().indexOf("Leil") > -1 ? $(divs[11]).text() : null;
+      dado.totalVisualizacoes = $(divs[14]).text().indexOf("Visualiza") > -1 ? $(divs[15]).text() : null;
+      dado.totalLances = $(divs[16]).text().indexOf("Lances") > -1 ? $(divs[17]).text() : null;
+
+      console.log(divs.length);
+      console.log(dado);
 
       if (dado.previsao.string && !dado.previsao.time && dado.previsao.string.includes(':') && dado.realizacao.date) {
         dado.previsao = tratarDataHora(`${dado.realizacao.string} ${dado.previsao.string}`);
@@ -139,7 +156,7 @@ const exec = ({ cheerio, request, db: { salvarLista } }) => {
         }
       }
 
-      if (dado.descricao.toLowerCase().indexOf('colis') === 0) {
+      if (dado.descricao.toLowerCase().indexOf('colis') > -1 || dado.descricao.toLowerCase().indexOf('sinist') > -1) {
         dado.tipo = 'colisao';
       } else if (dado.descricao.toLowerCase().indexOf('furto') === 0 || dado.descricao.toLowerCase().indexOf('roubo') === 0) {
         dado.tipo = 'roubo'

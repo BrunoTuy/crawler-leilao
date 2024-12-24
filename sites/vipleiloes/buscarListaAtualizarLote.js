@@ -1,3 +1,5 @@
+import tratarVendedorTipo from './_tratarVendedorTipo.js';
+
 const exec = ({ request, db, cheerio }) => {
   const { list, salvarLista } = db;
   const colecao = "veiculos";
@@ -27,26 +29,12 @@ const exec = ({ request, db, cheerio }) => {
     delete(dados.log);
 
     const km = (KM || '').trim().split(' ')[0];
-    let vendedorTipo = null;
-
-    if (!vendedor) {
-      vendedorTipo = null;
-    } else if (vendedor.includes('SEGURO')) {
-      vendedorTipo = 'seguradora';
-    } else if (vendedor.includes('BANCO') || vendedor.includes('FINANCIA') || vendedor.includes('CONSORCIO')) {
-      vendedorTipo = 'financeira';
-    } else if (vendedor.includes('CTTU') || vendedor.includes('PRF') || vendedor.includes('DETRAN') || vendedor.includes('SMDT')) {
-      vendedorTipo = 'rodoviaria';
-    } else if (vendedor.includes('UFPI') || vendedor.includes('EQUATORIAL ENERGIA')) {
-      vendedorTipo = 'frota';
-    }
-
     const retorno = {};
     const objeto = {
       registro,
       site: 'vipleiloes.com.br',
       vendedor,
-      vendedorTipo,
+      vendedorTipo: tratarVendedorTipo(vendedor),
       veiculo,
       combustivel,
       ano,
@@ -59,10 +47,13 @@ const exec = ({ request, db, cheerio }) => {
       ultimoLanceValor,
       localLote,
       localLeilao: null,
-      dataInicio,
       encerrado,
       original: dados
     };
+
+    if (dataInicio) {
+      retorno.dataInicio = new Date(dataInicio);
+    }
 
     if (statusVeiculoLeilao === 6) {
       objeto.status = 'CONDICIONAL';
@@ -162,6 +153,7 @@ const exec = ({ request, db, cheerio }) => {
 
       const pagina = await buscarPagina({ registro });
       const json = await buscarJSON({ registro });
+
       const dados = dadosItem({
         registro,
         ...pagina,

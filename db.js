@@ -87,9 +87,9 @@ const exec = async () => {
         if (JSON.stringify(setDados) != '{}') {
           const atualizado = await update({ colecao, registro, set: setDados, debugUpdate });
 
-          console.log(`${idx+1}/${lista.length}`, registro, `Registro ${atualizado ? '' : 'não '}atualizado`);
+          console.log(lista.length > 1 ? `${idx+1}/${lista.length}` : '', registro, `Registro ${atualizado ? '' : 'não '}atualizado`);
         } else {
-          console.log(`${idx+1}/${lista.length}`, registro, 'Registro sem atualizações');
+          console.log(lista.length > 1 ? `${idx+1}/${lista.length}` : '', registro, 'Registro sem atualizações');
         }
       } else {
         const id = await insert({ colecao, dados: i });

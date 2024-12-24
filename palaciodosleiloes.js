@@ -12,15 +12,6 @@ const buscarLotesSalvar = async () => {
   await palacio.downloadFotos();
 };
 
-const buscarLotesAtualizar = async () => {
-  await palacio.buscarLotesAtualizar({
-    filtroHoras: '+6',
-    tempoEntreRequisicoes: 30000
-  });
-}
-
-buscarLotesSalvar();
-
 cron.schedule('*/1 * * * *', async () => {
   console.log('*** Atualizando [encerrando]', new Date());
   await palacio.buscarLotesAtualizar({
@@ -69,7 +60,7 @@ cron.schedule('45 * * * *', async () => {
   timezone: "America/Sao_Paulo"
 });
 
-cron.schedule('21 8,20 * * *', async () => {
+cron.schedule('21 6,20 * * *', async () => {
   console.log('*** Atualizando [+6]', new Date());
   await palacio.buscarLotesAtualizar({
     filtroHoras: '+6',
@@ -81,7 +72,7 @@ cron.schedule('21 8,20 * * *', async () => {
   timezone: "America/Sao_Paulo"
 });
 
-cron.schedule('19 */3 * * *', async () => {
+cron.schedule('19 23 * * *', async () => {
   console.log('*** Buscar lotes', new Date());
   await buscarLotesSalvar();
   console.log('*** Finalizando busca de lotes', new Date());
@@ -89,3 +80,5 @@ cron.schedule('19 */3 * * *', async () => {
   scheduled: true,
   timezone: "America/Sao_Paulo"
 });
+
+console.log('Agendamentos realizados');

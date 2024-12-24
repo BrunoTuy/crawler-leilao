@@ -7,7 +7,7 @@ import _db from './db.js';
 const db = await _db();
 const vip = await v({ cheerio, request, db });
 
-cron.schedule('00 7,13,19 * * *', async () => {
+cron.schedule('00 12,20 * * *', async () => {
   console.log('*** Atualizando lista de lotes', new Date());
   vip.buscarListaPrincipal(1, 5000);
 }, {
@@ -15,7 +15,7 @@ cron.schedule('00 7,13,19 * * *', async () => {
   timezone: "America/Sao_Paulo"
 });
 
-cron.schedule('45 8,14,20 * * *', async () => {
+cron.schedule('27 9,14,22 * * *', async () => {
   console.log('*** Atualizando lotes', new Date());
   vip.buscarListaAtualizarLote(5000);
 }, {

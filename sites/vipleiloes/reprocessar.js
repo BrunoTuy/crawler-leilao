@@ -1,8 +1,10 @@
+import tratarVendedorTipo from './_tratarVendedorTipo.js';
+
 const exec = ({ db: { insert, update, list, get } }) => {
   const colecao = "veiculos";
 
-  const dadosItem = ({ original: { statusVeiculoLeilao, url } }) => {
-    const retorno = {};
+  const dadosItem = ({ original: { statusVeiculoLeilao, url, leilaoDataInicio, origem } }) => {
+    const retorno = { vendedorTipo: tratarVendedorTipo(origem) };
 
     if (url) {
       retorno.link = `https://www.vipleiloes.com.br${url}`;
@@ -12,6 +14,10 @@ const exec = ({ db: { insert, update, list, get } }) => {
       retorno.status = 'CONDICIONAL';
     } else if (statusVeiculoLeilao === 3) {
       retorno.status = 'VENDIDO';
+    }
+
+    if (leilaoDataInicio) {
+      retorno.previsao = new Date(leilaoDataInicio);
     }
 
     return retorno;

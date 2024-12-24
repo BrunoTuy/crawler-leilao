@@ -1,5 +1,7 @@
 import tratarDinheiro from './_tratarDinheiro.js';
 import tratarDataHora from './_tratarDataHora.js';
+import tratarVendedorTipo from './_tratarVendedorTipo.js';
+import axios from 'axios';
 
 const pegarDeParenteses = (val) => {
   const inicio = val.indexOf('(')+1;
@@ -14,15 +16,16 @@ const dadosItem = (dados) => {
     encerrado,
     bem: veiculo,
     origem: vendedor,
-    Locallote: localLote,
-    LocalLeilao: localLeilao,
+    localLote,
+    localLeilao,
     realizacao: dataInicio,
+    previsao,
     Acessorios,
-    Ano: ano,
-    Combustivel: combustivel,
-    Situacao: situacao,
+    ano,
+    combustivel,
+    situacao,
     lances,
-    origemTipo: vendedorTipo,
+    origemTipo,
     KM,
     descricao,
     fotos,
@@ -34,8 +37,9 @@ const dadosItem = (dados) => {
   const retorno = {};
   const objeto = {
     registro,
+    link: `https://www.palaciodosleiloes.com.br/site/lotem.php?cl=${registro.lote}`,
     vendedor,
-    vendedorTipo,
+    vendedorTipo: tratarVendedorTipo(vendedor, origemTipo),
     veiculo,
     combustivel,
     ano,
@@ -50,6 +54,10 @@ const dadosItem = (dados) => {
     encerrado,
     original: dados
   };
+
+  if (previsao && previsao.date) {
+    objeto.previsao = previsao.date;
+  }
 
   if (lances.length > 0) {
     const ultimoLance = lances.pop();
@@ -71,21 +79,21 @@ const exec = ({ cheerio, request, db: { list, get, salvarLista } }) => {
   const colecao = 'veiculos';
   const site = 'palaciodosleiloes.com.br';
   const baixarPagina = async ({ lote, leilao }) => {
-    const response = await request.post('https://www.palaciodosleiloes.com.br/camada_ajax/lotem.php', {
-      form: {
-        opcao: "exibir_lote_m",
-        cod_lote: lote,
-        cod_leilao: leilao
-      }
+    const { data } = await axios.postForm('https://www.palaciodosleiloes.com.br/site/camada_ajax/lotem.php?quebra=0.4354402653860123&opcao=exibir_lote_m&cod_lote=1344247&cod_leilao=7687&num_lote=0', {
+      quebra: "0.4354402653860123",
+      opcao: "exibir_lote_m",
+      cod_lote: lote,
+      cod_leilao: leilao,
+      num_lote: "0"
     });
 
-    if (response === '0') {
+    if (!data || data.length < 100) {
       return { encerrado: true };
     }
 
-    const $ = cheerio.load(response);
-
+    const $ = cheerio.load(data);
     const obj = {
+      registro: { lote, leilao },
       fotos: [],
       lances: [],
     };
@@ -98,7 +106,7 @@ const exec = ({ cheerio, request, db: { list, get, salvarLista } }) => {
     }
     obj.lanceAtual = tratarDinheiro($('div.row div.col div.h1').text());
 
-    const tableLances = $('table.table.table-bordered.table-sm.small.mb-1 tr');
+    const tableLances = $('table.table.table-bordered.border-dark tr');
     const tdsHeader = $(tableLances[0]).find('td');
     obj.totalLances = Number(pegarDeParenteses($(tdsHeader[0]).text()));
     obj.totalVisualizacoes = Number(pegarDeParenteses($(tdsHeader[1]).text()));
@@ -113,7 +121,7 @@ const exec = ({ cheerio, request, db: { list, get, salvarLista } }) => {
 
     obj.lances.reverse();
 
-    const tableInformacoes = $('table.table.table-sm.table-bordered.small.mt-1 tr');
+    const tableInformacoes = $('table.table.table-sm.table-bordered.small.mt-3 tr');
 
     for (let idx = 0; idx < tableInformacoes.length; idx++) {
       const tds = $(tableInformacoes[idx]).find('td');
@@ -122,26 +130,28 @@ const exec = ({ cheerio, request, db: { list, get, salvarLista } }) => {
         let nome = $(tds[0]).text().replace(/ /g, "");
         const valor = $(tds[1]).text().trim();
 
-        if (nome.includes('ncia/Cilin')) {
-          nome = 'Potencia_Cilindradas';
+        if (nome.includes('Ano')) {
+          nome = 'ano';
         } else if (nome.includes('Combust')) {
-          nome = 'Combustivel';
-        } else if (nome.includes('Situa')) {
-          nome = 'Situacao';
-        } else if (nome.includes('Previs')) {
-          nome = 'Previsao';
-        } else if (nome.includes('Acess')) {
-          nome = 'Acessorios';
-        } else if (nome.includes('Localleil')) {
-          nome = 'LocalLeilao';
+          nome = 'combustivel';
+        } else if (nome.includes('Estado')) {
+          nome = 'situacao';
         } else if (nome === 'Origem') {
           nome = 'origemTipo';
+        } else if (nome === 'Finalplaca') {
+          nome = 'finalplaca:';
         }
 
-        if (nome === 'Previsao') {
-          /*obj.previsao = tratarDataHora(valor);*/
-        } else if (nome === 'Lote') {
-          obj.lote = Number(valor);
+        if (nome.includes('Leil')) {
+          const previsaoSplit = valor.split(' - ');
+
+          if (previsaoSplit.length === 2) {
+            obj.previsao = tratarDataHora(previsaoSplit[1]);
+          } else {
+            obj.localLeilao = valor;
+          }
+        } else if (nome === 'Lote' && isNaN(valor)) {
+          obj.localLote = valor;
         } else if (!nome.indexOf('Leil') !== 0) {
           obj[nome] = valor;
         }
@@ -174,7 +184,7 @@ const exec = ({ cheerio, request, db: { list, get, salvarLista } }) => {
 
   const baixarLoteAtualizar = async (array, index, tempoEntreRequisicoes) => {
     if (index > array.length - 1) {
-      console.log(`Fim da lista - ${index+1}/${array.length}`);
+      array.length > 1 && console.log(`Fim da lista - ${index+1}/${array.length}`);
 
       return;
     }
@@ -201,7 +211,11 @@ const exec = ({ cheerio, request, db: { list, get, salvarLista } }) => {
     setTimeout(() => baixarLoteAtualizar(array, index+1, tempoEntreRequisicoes), tempoEntreRequisicoes);
   };
 
-  const fnc = async ({ encerrando, tempoEntreRequisicoes, filtroHoras }) => {
+  const fnc = async ({ encerrando, tempoEntreRequisicoes, filtroHoras, lista }) => {
+    if (lista) {
+      return baixarLoteAtualizar(lista, 0, tempoEntreRequisicoes);
+    }
+
     const data = new Date();
     const filtro = {
       site,

@@ -1,13 +1,13 @@
+import tratarVendedorTipo from './_tratarVendedorTipo.js';
+
 const exec = ({ db: { insert, update, list, get } }) => {
   const colecao = "veiculos";
 
-  const dadosItem = ({registro: {leilao, lote}, original: {estadoLote}}) => {
-    const retorno = {};
+  const dadosItem = ({ original: { previsao, origem, origemTipo } }) => {
+    const retorno = { vendedorTipo: tratarVendedorTipo(origem, origemTipo) };
 
-    if (['vendido', 'venda aceita'].includes((estadoLote || '').toLowerCase())) {
-      retorno.status = 'vendido';
-    } else {
-      retorno.status = (estadoLote || '').toUpperCase();
+    if (previsao && previsao.date) {
+      retorno.previsao = previsao.date;
     }
 
     return retorno;
@@ -15,6 +15,7 @@ const exec = ({ db: { insert, update, list, get } }) => {
 
   const salvarLista = async (lista, idx, cb) => {
     let registro = {};
+
     try {
       if (idx >= lista.length) {
         console.log(colecao, 'Fim da lista', `${idx}/${lista.length}`, new Date());
@@ -54,7 +55,7 @@ const exec = ({ db: { insert, update, list, get } }) => {
     const listaBanco = await list({
       colecao,
       colunas: { registro: true },
-      filtro: {site: 'milanleiloes.com.br'}
+      filtro: {site: 'palaciodosleiloes.com.br'}
     });
 
     salvarLista(listaBanco, 0, cb);
