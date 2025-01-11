@@ -12,4 +12,4 @@ const vip = await v({ cheerio, request, db });
 const milan = await m({ cheerio, request, db });
 const guariglia = await g({ cheerio, request, db });
 
-guariglia.buscarListaPrincipal();
+guariglia.atualizarLote(1000);
